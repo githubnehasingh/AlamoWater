@@ -6,10 +6,25 @@
 	objectVersion = 48;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		91ADDCAC204E7E3A0004E220 /* UniversalAlamoWater */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 91ADDCAD204E7E3A0004E220 /* Build configuration list for PBXAggregateTarget "UniversalAlamoWater" */;
+			buildPhases = (
+				91ADDCB0204E7E6A0004E220 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = UniversalAlamoWater;
+			productName = UniversalAlamoWater;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		91ADDC9A204E7D530004E220 /* AlamoWater.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91ADDC90204E7D530004E220 /* AlamoWater.framework */; };
 		91ADDC9F204E7D530004E220 /* AlamoWaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91ADDC9E204E7D530004E220 /* AlamoWaterTests.swift */; };
 		91ADDCA1204E7D530004E220 /* AlamoWater.h in Headers */ = {isa = PBXBuildFile; fileRef = 91ADDC93204E7D530004E220 /* AlamoWater.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		91ADDCAB204E7D700004E220 /* AlamoWater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91ADDCAA204E7D700004E220 /* AlamoWater.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +44,7 @@
 		91ADDC99204E7D530004E220 /* AlamoWaterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AlamoWaterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		91ADDC9E204E7D530004E220 /* AlamoWaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamoWaterTests.swift; sourceTree = "<group>"; };
 		91ADDCA0204E7D530004E220 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		91ADDCAA204E7D700004E220 /* AlamoWater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamoWater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +87,7 @@
 		91ADDC92204E7D530004E220 /* AlamoWater */ = {
 			isa = PBXGroup;
 			children = (
+				91ADDCAA204E7D700004E220 /* AlamoWater.swift */,
 				91ADDC93204E7D530004E220 /* AlamoWater.h */,
 				91ADDC94204E7D530004E220 /* Info.plist */,
 			);
@@ -148,9 +165,14 @@
 				TargetAttributes = {
 					91ADDC8F204E7D530004E220 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 					};
 					91ADDC98204E7D530004E220 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+					91ADDCAC204E7E3A0004E220 = {
 						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
 					};
@@ -170,6 +192,7 @@
 			targets = (
 				91ADDC8F204E7D530004E220 /* AlamoWater */,
 				91ADDC98204E7D530004E220 /* AlamoWaterTests */,
+				91ADDCAC204E7E3A0004E220 /* UniversalAlamoWater */,
 			);
 		};
 /* End PBXProject section */
@@ -191,11 +214,28 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		91ADDCB0204E7E6A0004E220 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\nUNIVERSAL_OUTPUTFOLDER=${BUILD_DIR}/${CONFIGURATION}-universal\n# make sure the output directory exists\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n# Step 1. Build Device and Simulator versions\nxcodebuild -target \"AlamoWater\" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos  BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\nxcodebuild -target \"AlamoWater\" -configuration ${CONFIGURATION} -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\n# Step 2. Copy the framework structure (from iphoneos build) to the universal folder\ncp -R \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/AlamoWater.framework\" \"${UNIVERSAL_OUTPUTFOLDER}/\"\n# Step 3. Copy Swift modules from iphonesimulator build (if it exists) to the copied framework directory\nSIMULATOR_SWIFT_MODULES_DIR=\"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/AlamoWater.framework/Modules/AlamoWater.swiftmodule/.\"\nif [ -d \"${SIMULATOR_SWIFT_MODULES_DIR}\" ]; then\ncp -R \"${SIMULATOR_SWIFT_MODULES_DIR}\" \"${UNIVERSAL_OUTPUTFOLDER}/AlamoWater.framework/Modules/AlamoWater.swiftmodule\"\nfi\n# Step 4. Create universal binary file using lipo and place the combined executable in the copied framework directory\nlipo -create -output \"${UNIVERSAL_OUTPUTFOLDER}/AlamoWater.framework/AlamoWater\" \"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/AlamoWater.framework/AlamoWater\" \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/AlamoWater.framework/AlamoWater\"\n# Step 5. Convenience step to copy the framework to the project's directory\ncp -R \"${UNIVERSAL_OUTPUTFOLDER}/AlamoWater.framework\" \"${PROJECT_DIR}\"\n# Step 6. Convenience step to open the project's directory in Finder\nopen \"${PROJECT_DIR}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		91ADDC8B204E7D530004E220 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91ADDCAB204E7D700004E220 /* AlamoWater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +374,7 @@
 		91ADDCA5204E7D530004E220 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -346,6 +387,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = headerlabs.com.AlamoWater;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -354,6 +396,7 @@
 		91ADDCA6204E7D530004E220 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -374,6 +417,7 @@
 		91ADDCA8204E7D530004E220 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = AlamoWaterTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -387,6 +431,7 @@
 		91ADDCA9204E7D530004E220 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = AlamoWaterTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -394,6 +439,22 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		91ADDCAE204E7E3A0004E220 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		91ADDCAF204E7E3A0004E220 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -423,6 +484,15 @@
 			buildConfigurations = (
 				91ADDCA8204E7D530004E220 /* Debug */,
 				91ADDCA9204E7D530004E220 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		91ADDCAD204E7E3A0004E220 /* Build configuration list for PBXAggregateTarget "UniversalAlamoWater" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				91ADDCAE204E7E3A0004E220 /* Debug */,
+				91ADDCAF204E7E3A0004E220 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
